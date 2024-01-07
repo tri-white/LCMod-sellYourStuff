@@ -9,6 +9,7 @@ Make mod compatible with mods that add items to store
 Make items not count as scrap, so you can't get EXP from them
 
 Make sell percentage configurable (default: 50%)
+Add ability to change if store-bought items should be counted as scrap
 
 # Bugs
 
