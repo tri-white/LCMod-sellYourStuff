@@ -17,7 +17,7 @@ namespace SellYourStuff.Patches
     // ensure that nothing is null, when you try to access it 
 
     /* TODO:
-     * show scanNode
+     * add ability to not count items as scrap when scanning (nodeType==0 or 1, but not 2)
      * don't count as scrap, until placed in company to sell
      * reset isScrap to false when grabbed item
      * bind patch to all items, not just flashlight
@@ -44,21 +44,27 @@ namespace SellYourStuff.Patches
         {
             if (__instance != null && __instance.itemProperties != null && AllItemsList.Contains(__instance.GetType().Name))
             {
-                __instance.gameObject.AddComponent<ScanNodeProperties>();
-                ScanNodeProperties scanNodeProperties = __instance.gameObject.GetComponent<ScanNodeProperties>();
+                GameObject ScanNode;
+
+                ScanNode = ((Component)UnityEngine.Object.FindObjectOfType<ScanNodeProperties>()).gameObject;
+
+                GameObject val = UnityEngine.Object.Instantiate<GameObject>(ScanNode, ((Component)__instance).transform.position, Quaternion.Euler(Vector3.zero), ((Component)__instance).transform);
+
+                ScanNodeProperties scanNodeProperties = val.GetComponent<ScanNodeProperties>();
+
                 if (scanNodeProperties != null)
                 {
                     scanNodeProperties.headerText = __instance.GetType().Name;
-                    scanNodeProperties.minRange = 0;
-                    scanNodeProperties.maxRange = 9;
-                    scanNodeProperties.requiresLineOfSight = true;
+                    scanNodeProperties.minRange = 2;
+                    scanNodeProperties.maxRange = 7;
                     scanNodeProperties.creatureScanID = -1;
-                    scanNodeProperties.nodeType = 0;
+                    scanNodeProperties.nodeType = 2;
                 }
                 else
                 {
                     Debug.LogError($"Couldn't add scanNodeProperties to instance of object named: {__instance.GetType().Name}");
                 }
+
 
                 __instance.SetScrapValue(__instance.itemProperties.creditsWorth/2);
             }
