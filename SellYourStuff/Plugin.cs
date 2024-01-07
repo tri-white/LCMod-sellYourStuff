@@ -1,4 +1,5 @@
-﻿using BepInEx;
+﻿
+using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using SellYourStuff.Patches;
@@ -13,7 +14,6 @@ namespace SellYourStuff
     [BepInPlugin(modGUID, modName, modVersion)]
     public class SellYourStuffModBase : BaseUnityPlugin
     {
-        // mod configurations for BepInEx library
         private const string modGUID = "Axeron.SellYourStuff";
         private const string modName = "SellYourStuff";
         private const string modVersion = "1.0.0.0";
@@ -26,7 +26,6 @@ namespace SellYourStuff
 
         void Awake()
         {
-            // May be useless
             if (Instance == null)
             {
                 Instance = this;
