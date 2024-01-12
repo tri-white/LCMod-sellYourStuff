@@ -55,7 +55,7 @@ namespace SellYourStuff.Patches
     {
         private static List<string> PatchableItems = new List<string> { "FlashlightItem",
             "PatcherTool", "Shovel", "WalkieTalkie","BoomboxItem",
-            "StunGrenadeItem","JetpackItem","ShotgunItem","LockPicker","ExtensionLadderItem",
+            "StunGrenadeItem","JetpackItem","ShotgunItem","LockPicker","ExtensionLadderItem","RadarBoosterItem",
             "SprayPaintItem","TetraChemicalItem"};
 
         [HarmonyPatch("Start")]
@@ -64,27 +64,41 @@ namespace SellYourStuff.Patches
         {
             if (__instance != null && __instance.itemProperties != null && PatchableItems.Contains(__instance.GetType().Name))
             {
-                GameObject ScanNode;
-
-                ScanNode = ((Component)UnityEngine.Object.FindObjectOfType<ScanNodeProperties>()).gameObject;
-
-                GameObject val = UnityEngine.Object.Instantiate<GameObject>(ScanNode, ((Component)__instance).transform.position, Quaternion.Euler(Vector3.zero), ((Component)__instance).transform);
-
-                ScanNodeProperties scanNodeProperties = val.GetComponent<ScanNodeProperties>();
-
-                if (scanNodeProperties != null)
+                // if object doesn't have a scanNode already
+                try 
                 {
-                    scanNodeProperties.headerText = __instance.GetType().Name; 
-                    scanNodeProperties.nodeType = 2;
-                    scanNodeProperties.minRange = 3; // need to set it to the value which scrap has. (value 2 - can scan in your own hands when looking up) (value 3 seems fine, but scan disappears when coming close)
-                    scanNodeProperties.maxRange = 7;
-                    scanNodeProperties.requiresLineOfSight = true;
-                    scanNodeProperties.creatureScanID = -1;
+                    object node = __instance.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText;
+
+                    Debug.Log($"Instance of {__instance.GetType().Name} has scanNode already.");
                 }
-                else
+                catch
                 {
-                    Debug.LogError($"Couldn't add scanNodeProperties to instance of object named: {__instance.GetType().Name}");
+                    Debug.Log($"Instance of {__instance.GetType().Name} doesnt have scanNode. Creating node");
+                    GameObject ScanNode;
+
+                    ScanNode = ((Component)UnityEngine.Object.FindObjectOfType<ScanNodeProperties>()).gameObject;
+
+                    GameObject val = UnityEngine.Object.Instantiate<GameObject>(ScanNode, ((Component)__instance).transform.position, Quaternion.Euler(Vector3.zero), ((Component)__instance).transform);
+
+                    ScanNodeProperties scanNodeProperties = val.GetComponent<ScanNodeProperties>();
+
+                    if (scanNodeProperties != null)
+                    {
+                        scanNodeProperties.headerText = __instance.GetType().Name;
+                        scanNodeProperties.nodeType = 2;
+                        scanNodeProperties.minRange = 3; // need to set it to the value which scrap has. (value 2 - can scan in your own hands when looking up) (value 3 seems fine, but scan disappears when coming close)
+                        scanNodeProperties.maxRange = 7;
+                        scanNodeProperties.requiresLineOfSight = true;
+                        scanNodeProperties.creatureScanID = -1;
+                    }
+                    else
+                    {
+                        Debug.LogError($"Couldn't add scanNodeProperties to instance of object named: {__instance.GetType().Name}");
+                    }
+
                 }
+
+
 
                 __instance.itemProperties.isScrap = true;
 
@@ -105,31 +119,32 @@ namespace SellYourStuff.Patches
 
     }
     
-    [HarmonyPatch(typeof(RadarBoosterItem))]
-    internal class RadarBoosterPatch
-    {
+    //[HarmonyPatch(typeof(RadarBoosterItem))]
+    //internal class RadarBoosterPatch
+    //{
 
-        [HarmonyPatch("Start")]
-        [HarmonyPostfix]
-        static void Postfix(RadarBoosterItem __instance)
-        {
-            if (__instance != null && __instance.itemProperties != null)
-            {
-                __instance.itemProperties.isScrap = true;
+    //    [HarmonyPatch("Start")]
+    //    [HarmonyPostfix]
+    //    static void Postfix(RadarBoosterItem __instance)
+    //    {
+    //        if (__instance != null && __instance.itemProperties != null)
+    //        {
+    //            __instance.itemProperties.isScrap = true;
 
-                __instance.SetScrapValue(__instance.itemProperties.creditsWorth / 2); // need to also multiply it by current discount in Terminal class
+    //            __instance.SetScrapValue(__instance.itemProperties.creditsWorth / 2); // need to also multiply it by current discount in Terminal class
 
-                __instance.itemProperties.isScrap = false ;
-
-            }
-            else
-            {
-                Debug.LogError("One of the required objects (__instance, __instance.itemProperties) is null.");
-            }
-        }
+    //            __instance.itemProperties.isScrap = false ;
 
 
+    //        }
+    //        else
+    //        {
+    //            Debug.LogError("One of the required objects (__instance, __instance.itemProperties) is null.");
+    //        }
+    //    }
 
-    }
+
+
+    //}
 
 }
