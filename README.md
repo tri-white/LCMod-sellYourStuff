@@ -25,8 +25,8 @@ This mod is not fully tested. I appreciate any help
 
 - If item was bought for 140 but delivered on the day when its price was at 200 - then it will cost 200
 
-###### For support
+##### For support  
 
-https://www.buymeacoffee.com/axeron  
+https://www.buymeacoffee.com/axeron   
 I really appreciate it! Like, really!
 
