@@ -1,3 +1,7 @@
+C:\Program Files (x86)\Lethal Company\BepInEx\plugins\SellYourStuff.dll
+C:\Program Files (x86)\Lethal Company\BepInEx\plugins\SellYourStuff.pdb
+C:\bin\Debug\SellYourStuff.dll
+C:\bin\Debug\SellYourStuff.pdb
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\SellYourStuff.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\SellYourStuff.pdb
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\0Harmony.dll
@@ -14,16 +18,16 @@ C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.Au
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Unity.Animation.Rigging.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.PhysicsModule.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.ParticleSystemModule.dll
+C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.UI.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Unity.TextMeshPro.dll
+C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Facepunch.Steamworks.Win64.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Unity.InputSystem.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.VFXModule.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.AIModule.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Unity.RenderPipelines.HighDefinition.Runtime.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.TerrainModule.dll
-C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.UI.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Unity.RenderPipelines.Core.Runtime.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.UIModule.dll
-C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Facepunch.Steamworks.Win64.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\DissonanceVoip.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Assembly-CSharp-firstpass.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Facepunch Transport for Netcode for GameObjects.dll
@@ -37,6 +41,7 @@ C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\ClientNetworkT
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.InputLegacyModule.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.IMGUIModule.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.GridModule.dll
+C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Unity.Burst.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.DSPGraphModule.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.UnityCurlModule.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.ContentLoadModule.dll
@@ -82,7 +87,6 @@ C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.Wi
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.XRModule.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.ARModule.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\UnityEngine.InputModule.dll
-C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Unity.Burst.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Unity.Mathematics.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Unity.VisualEffectGraph.Runtime.dll
 C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\Unity.RenderPipelines.HighDefinition.Config.Runtime.dll

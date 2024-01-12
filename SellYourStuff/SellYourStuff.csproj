@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Lethal Company\BepInEx\core\0Harmony.dll</HintPath>
@@ -63,4 +66,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /q /y "C:\Users\olego\source\repos\SellYourStuff\SellYourStuff\bin\Debug\SellYourStuff.dll" "C:\Program Files (x86)\Lethal Company\BepInEx\plugins\"
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

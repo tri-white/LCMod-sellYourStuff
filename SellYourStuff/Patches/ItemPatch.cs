@@ -28,7 +28,6 @@ namespace SellYourStuff.Patches
      * 
      *              Version 1.0.0
      * multiply creditsWorth by current discount to get price (Terminal -> itemSalesPercentages)
-     * test what will happen in the end stats, if amount of scrap is higher than overall amount
      * RadarBooster has wrong price, and it has price on its' separate parts. when it is activated - it gets name and price (funny, you can sell Louie :D)
      *    
      *              Version 1.1.0
@@ -97,14 +96,13 @@ namespace SellYourStuff.Patches
         }
     }*/
 
-
     [HarmonyPatch(typeof(GrabbableObject))]
     internal class ItemPatch
     {
         private static List<string> PatchableItems = new List<string> { "FlashlightItem",
             "PatcherTool", "Shovel", "WalkieTalkie","BoomboxItem",
-            "StunGrenadeItem","JetpackItem","ShotgunItem","LockPicker","ExtensionLadderItem",
-        "RadarBoosterItem","SprayPaintItem","TetraChemicalItem"};
+            "StunGrenadeItem","JetpackItem","ShotgunItem","LockPicker","ExtensionLadderItem",//"RadarBoosterItem",
+            "SprayPaintItem","TetraChemicalItem"};
 
         [HarmonyPatch("Start")]
         [HarmonyPostfix]
@@ -124,8 +122,8 @@ namespace SellYourStuff.Patches
                 {
                     scanNodeProperties.headerText = __instance.GetType().Name;
                     scanNodeProperties.nodeType = 2;
-                    scanNodeProperties.minRange = 3;
-                    scanNodeProperties.maxRange = 10;
+                    scanNodeProperties.minRange = 3; // need to set it to the value which scrap has. (value 2 - can scan in your own hands when looking up) (value 3 seems fine, but scan disappears when coming close)
+                    scanNodeProperties.maxRange = 7;
                     scanNodeProperties.requiresLineOfSight = true;
                     scanNodeProperties.creatureScanID = -1;
                 }
@@ -136,7 +134,7 @@ namespace SellYourStuff.Patches
 
                 __instance.itemProperties.isScrap = true;
 
-                __instance.SetScrapValue(__instance.itemProperties.creditsWorth/2);
+                __instance.SetScrapValue(__instance.itemProperties.creditsWorth/2); // need to also multiply it by current discount in Terminal class
             }
             else
             {
@@ -147,4 +145,53 @@ namespace SellYourStuff.Patches
         
 
     }
+
+    // only activated radar can be sold
+    // radar booster has bugged icon when collected as scrap
+    
+    [HarmonyPatch(typeof(RadarBoosterItem))]
+    internal class RadarBoosterPatch
+    {
+
+        [HarmonyPatch("EnableRadarBooster")]
+        [HarmonyPostfix]
+        static void Postfix(RadarBoosterItem __instance)
+        {
+            if (__instance != null && __instance.itemProperties != null)
+            {
+                GameObject ScanNode;
+
+                ScanNode = ((Component)UnityEngine.Object.FindObjectOfType<ScanNodeProperties>()).gameObject;
+
+                GameObject val = UnityEngine.Object.Instantiate<GameObject>(ScanNode, ((Component)__instance).transform.position, Quaternion.Euler(Vector3.zero), ((Component)__instance).transform);
+
+                ScanNodeProperties scanNodeProperties = val.GetComponent<ScanNodeProperties>();
+
+                if (scanNodeProperties != null)
+                {
+                    scanNodeProperties.nodeType = 2;
+                    scanNodeProperties.minRange = 3; // need to set it to the value which scrap has. (value 2 - can scan in your own hands when looking up) (value 3 seems fine, but scan disappears when coming close)
+                    scanNodeProperties.maxRange = 7;
+                    scanNodeProperties.requiresLineOfSight = true;
+                    scanNodeProperties.creatureScanID = -1;
+                }
+                else
+                {
+                    Debug.LogError($"Couldn't add scanNodeProperties to instance of object named: {__instance.GetType().Name}");
+                }
+
+                __instance.itemProperties.isScrap = true;
+
+                __instance.SetScrapValue(__instance.itemProperties.creditsWorth / 2); // need to also multiply it by current discount in Terminal class
+            }
+            else
+            {
+                Debug.LogError("One of the required objects (__instance, __instance.itemProperties) is null.");
+            }
+        }
+
+
+
+    }
+
 }
