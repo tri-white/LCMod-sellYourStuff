@@ -18,8 +18,9 @@ namespace SellYourStuff.Patches
      * 
      *              Version 1.0.0
      * multiply creditsWorth by current discount to get price (Terminal -> itemSalesPercentages)
-     * RadarBooster gets 2 scanNodes, first radar booster doesnt, but the next ones - yes
      * test all items in v49
+     * Yield sign is scanned as "Shovel". check other items too for it.
+     *      then does yield sign count as notScrap?
      * 
      * Possibly:
      * allow user to change price of items (so I can sell bought items for more or less than 50%)
@@ -37,7 +38,6 @@ namespace SellYourStuff.Patches
         [HarmonyPatch("PlaceItemOnCounter")]
         static void Prefix(DepositItemsDesk __instance, [HarmonyArgument(0)] PlayerControllerB playerWhoTriggered)
         {
-            // I need to put this thing inside "if" in this method, and also, before calling other methods.
             if (playerWhoTriggered != null)
             {
                 GrabbableObject item = playerWhoTriggered.currentlyHeldObjectServer;
@@ -50,13 +50,12 @@ namespace SellYourStuff.Patches
 
         }
     }
-    //test if loot doesnt become NOTscrap
     [HarmonyPatch(typeof(GrabbableObject))]
     internal class ItemPatch
     {
         private static List<string> PatchableItems = new List<string> { "FlashlightItem",
             "PatcherTool", "Shovel", "WalkieTalkie","BoomboxItem",
-            "StunGrenadeItem","JetpackItem","ShotgunItem","LockPicker","ExtensionLadderItem",//"RadarBoosterItem",
+            "StunGrenadeItem","JetpackItem","ShotgunItem","LockPicker","ExtensionLadderItem",
             "SprayPaintItem","TetraChemicalItem"};
 
         [HarmonyPatch("Start")]
@@ -105,8 +104,6 @@ namespace SellYourStuff.Patches
         
 
     }
-
-    // only activated radar can be sold. otherwise it gets 2 scanNodes and everything is broken possibly
     
     [HarmonyPatch(typeof(RadarBoosterItem))]
     internal class RadarBoosterPatch
