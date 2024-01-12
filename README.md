@@ -18,7 +18,7 @@ You bought whole lot of equipment for you and your crew, but as the deadline app
   + items are sold for **50%** of their price, including discounts
 
 ### Warning
-This mod is not fully tested. I appreciate any help - [Github Repository](https://github.com/tri-white/LCMod-SellYourStuff)
+This mod is not fully tested. I appreciate any help
 
 ### Noticed issues
 - Sometimes you can't scan items when they're outside of the ship
