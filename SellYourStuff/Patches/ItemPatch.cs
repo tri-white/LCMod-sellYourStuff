@@ -54,9 +54,9 @@ namespace SellYourStuff.Patches
     {
         private const int NodeType = 2;
         private const int MinRange = 3;
-        private const int MaxRange = 7;
+        private const int MaxRange = 12;
         private const int creatureScanId = -1;
-        private const bool requiresLineOfSight = true;
+        private const bool requiresLineOfSight = false;
 
         // Function that does all stuff. Applies scanNode to item, sets its value
         [HarmonyPatch("Start")]

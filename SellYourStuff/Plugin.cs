@@ -16,7 +16,7 @@ namespace SellYourStuff
     {
         private const string modGUID = "Axeron.SellYourStuff";
         private const string modName = "SellYourStuff";
-        private const string modVersion = "1.0.0.0";
+        private const string modVersion = "1.0.1.0";
 
         private readonly Harmony harmony = new Harmony(modGUID);
 
