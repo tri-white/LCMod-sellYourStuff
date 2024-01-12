@@ -14,12 +14,13 @@ using UnityEngine;
 namespace SellYourStuff.Patches
 {
     /*
-     * Optimization:
      * 
      * add parametrized values, that can be configured (scanNodeProperties)
      * 
+     * test plugin again
      * 
-     *  // when I patch GrabbableObject as a whole class, then my method Postfix() will be called for each grabbableObject on map when they spawn.
+     * 
+     *  // but when I patch GrabbableObject as a whole class, then my method Postfix() will be called for each grabbableObject on map when they spawn.
             // I can write this method separately for all the items classes like FlashlightItem, RadarBoosterItem etc, but it will take memory and plugin will be several times bigger
             // maybe somehow put array of classes into [HarmonyPatch(typeof(...))]
      */
@@ -57,6 +58,8 @@ namespace SellYourStuff.Patches
 
     /// <summary>
     /// Class that applies scanNodes for items and sets their prices.
+    /// 
+    /// 
     /// </summary>
     [HarmonyPatch(typeof(GrabbableObject))]
     internal class ItemPatch : PatchableItemsList
@@ -69,7 +72,6 @@ namespace SellYourStuff.Patches
 
         // Main function that does all stuff. Applies node to item, sets its value
         [HarmonyPatch("Start")]
-        [HarmonyPostfix]
         static void Postfix(GrabbableObject __instance)
         {
             if (__instance != null && __instance.itemProperties != null && PatchableItems.Contains(__instance.itemProperties.itemName))
@@ -100,14 +102,12 @@ namespace SellYourStuff.Patches
                         __instance.SetScrapValue(
                                     (__instance.itemProperties.creditsWorth * percent) / 200
                             ); // formula is written that way to avoid float/double values
-
-
                     }
                 }
             }
             catch
             {
-                Debug.LogError("Item not found in store");
+                Debug.LogError("Item not found in the current terminal store or other error occured");
             }
 
         }
@@ -122,11 +122,9 @@ namespace SellYourStuff.Patches
             }
             catch
             {
-                //creating scanNode
                 GameObject ScanNode;
 
                 ScanNode = ((Component)UnityEngine.Object.FindObjectOfType<ScanNodeProperties>()).gameObject;
-
                 if (ScanNode != null)
                 {
                     GameObject val = UnityEngine.Object.Instantiate<GameObject>(ScanNode, ((Component)__instance).transform.position, Quaternion.Euler(Vector3.zero), ((Component)__instance).transform);
