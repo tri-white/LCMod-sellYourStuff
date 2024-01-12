@@ -37,8 +37,6 @@ namespace SellYourStuff
 
             harmony.PatchAll(typeof(SellYourStuffModBase));
             harmony.PatchAll(typeof(ItemPatch));
-            //harmony.PatchAll(typeof(RadarBoosterPatch));
-            //harmony.PatchAll(typeof(GrabPatch));
             harmony.PatchAll(typeof(SellPatch));
         }
 

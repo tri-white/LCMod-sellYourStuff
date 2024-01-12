@@ -19,6 +19,7 @@ namespace SellYourStuff.Patches
      *              Version 1.0.0
      * multiply creditsWorth by current discount to get price (Terminal -> itemSalesPercentages)
      * Yield sign is scanned as "Shovel". check other items too for it.
+     * check if "Instance of ... has scan node' -- appears for each item separately?
      * 
      * Possibly:
      * allow user to change price of items (so I can sell bought items for more or less than 50%)
@@ -96,12 +97,23 @@ namespace SellYourStuff.Patches
 
                 }
 
-
-
                 __instance.itemProperties.isScrap = true;
 
-                __instance.SetScrapValue(__instance.itemProperties.creditsWorth/2); // need to also multiply it by current discount in Terminal class
-                                                                                    // what if I buy item on discounts, then change moon to get this item for full price?
+                for (int k = 0; k < UnityEngine.Object.FindObjectOfType<Terminal>().buyableItemsList.Length; k++)
+                {
+
+                    if(UnityEngine.Object.FindObjectOfType<Terminal>().buyableItemsList[k].itemName == __instance.itemProperties.itemName)
+                    {
+                            __instance.SetScrapValue(
+                        
+                                    (__instance.itemProperties.creditsWorth / 2)
+                                    * (UnityEngine.Object.FindObjectOfType<Terminal>().itemSalesPercentages[k] / 100)
+                                
+                            );
+
+                    }
+                }
+
 
                 __instance.itemProperties.isScrap = false ;
 
