@@ -13,17 +13,7 @@ using UnityEngine;
 
 namespace SellYourStuff.Patches
 {
-    /*
-     * 
-     * add parametrized values, that can be configured (scanNodeProperties)
-     * 
-     * test plugin again
-     * 
-     * 
-     *  // but when I patch GrabbableObject as a whole class, then my method Postfix() will be called for each grabbableObject on map when they spawn.
-            // I can write this method separately for all the items classes like FlashlightItem, RadarBoosterItem etc, but it will take memory and plugin will be several times bigger
-            // maybe somehow put array of classes into [HarmonyPatch(typeof(...))]
-     */
+
 
     /// <summary>
     /// This class contains list of names of items that will be patched by this plugin.
@@ -58,8 +48,6 @@ namespace SellYourStuff.Patches
 
     /// <summary>
     /// Class that applies scanNodes for items and sets their prices.
-    /// 
-    /// 
     /// </summary>
     [HarmonyPatch(typeof(GrabbableObject))]
     internal class ItemPatch : PatchableItemsList
@@ -70,7 +58,7 @@ namespace SellYourStuff.Patches
         private const int creatureScanId = -1;
         private const bool requiresLineOfSight = true;
 
-        // Main function that does all stuff. Applies node to item, sets its value
+        // Function that does all stuff. Applies scanNode to item, sets its value
         [HarmonyPatch("Start")]
         static void Postfix(GrabbableObject __instance)
         {
@@ -117,7 +105,7 @@ namespace SellYourStuff.Patches
         {
             try
             {
-                object node = __instance.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText; //checking if scanNode exists by existence of header text on scanNode
+                object node = __instance.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText;
 
             }
             catch
