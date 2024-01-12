@@ -12,27 +12,13 @@ using UnityEngine;
 
 namespace SellYourStuff.Patches
 {
-    // ensure that nothing is null, when you try to access it 
-
-    /* TODO:
-     * 
-     *              Version 1.0.0
-     * multiply creditsWorth by current discount to get price (Terminal -> itemSalesPercentages)
-     * Yield sign is scanned as "Shovel". check other items too for it.
-     * check if "Instance of ... has scan node' -- appears for each item separately?
-     * 
-     * Possibly:
-     * allow user to change price of items (so I can sell bought items for more or less than 50%)
-     * add modded items
-    */
 
     [HarmonyPatch(typeof(DepositItemsDesk))]
     internal class SellPatch
     {
-        private static List<string> PatchableItems = new List<string> { "FlashlightItem",
-        "PatcherTool", "Shovel", "WalkieTalkie","BoomboxItem",
-        "StunGrenadeItem","JetpackItem","ShotgunItem","LockPicker","ExtensionLadderItem",
-    "RadarBoosterItem","SprayPaintItem","TetraChemicalItem"};
+        private static List<string> PatchableItems = new List<string> { "Flashlight","Extension ladder","Lockpicker","Jetpack",
+            "Pro-flashlight","TZP-Inhalant","Stun grenade", "Boombox","Spray paint",
+            "Shovel","Walkie-talkie","Zap gun","Radar-booster"};
 
         [HarmonyPatch("PlaceItemOnCounter")]
         static void Prefix(DepositItemsDesk __instance, [HarmonyArgument(0)] PlayerControllerB playerWhoTriggered)
@@ -41,7 +27,7 @@ namespace SellYourStuff.Patches
             {
                 GrabbableObject item = playerWhoTriggered.currentlyHeldObjectServer;
 
-                if (item != null && item.itemProperties != null && PatchableItems.Contains(item.GetType().Name))
+                if (item != null && item.itemProperties != null && PatchableItems.Contains(item.itemProperties.itemName))
                 {
                     item.itemProperties.isScrap = true;
                 }
@@ -52,21 +38,25 @@ namespace SellYourStuff.Patches
     [HarmonyPatch(typeof(GrabbableObject))]
     internal class ItemPatch
     {
-        private static List<string> PatchableItems = new List<string> { "FlashlightItem",
-            "PatcherTool", "Shovel", "WalkieTalkie","BoomboxItem",
-            "StunGrenadeItem","JetpackItem","ShotgunItem","LockPicker","ExtensionLadderItem","RadarBoosterItem",
-            "SprayPaintItem","TetraChemicalItem"};
+        // list of names of patchable items. I don't use classes, as it will cause conflicts (ex. Shovel class has instances of: Yield sign, Stop sign, Shovel, which causes slight problems)
+        // but when I patch GrabbableObject as a whole class, then my method Postfix() will be called for each grabbableObject on map when they spawn.
+            // I can write this method separately for all the items classes like FlashlightItem, RadarBoosterItem etc, but it will take memory and plugin will be several times bigger
+            // maybe somehow put array of classes into [HarmonyPatch(typeof(...))]
+
+        private static List<string> PatchableItems = new List<string> { "Flashlight","Extension ladder","Lockpicker","Jetpack",
+            "Pro-flashlight","TZP-Inhalant","Stun grenade", "Boombox","Spray paint",
+            "Shovel","Walkie-talkie","Zap gun","Radar-booster"};
 
         [HarmonyPatch("Start")]
         [HarmonyPostfix]
         static void Postfix(GrabbableObject __instance)
         {
-            if (__instance != null && __instance.itemProperties != null && PatchableItems.Contains(__instance.GetType().Name))
+            if (__instance != null && __instance.itemProperties != null && PatchableItems.Contains(__instance.itemProperties.itemName))
             {
-                // if object doesn't have a scanNode already
+                // if object doesn't have a scanNode already then catch() will be done
                 try 
                 {
-                    object node = __instance.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText; //checking if node exists by existence of header text on scanNode
+                    object node = __instance.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText; //checking if scanNode exists by existence of header text on scanNode
 
                     Debug.Log($"Instance of {__instance.GetType().Name} has scanNode already.");
                 }
@@ -76,44 +66,58 @@ namespace SellYourStuff.Patches
                     GameObject ScanNode;
 
                     ScanNode = ((Component)UnityEngine.Object.FindObjectOfType<ScanNodeProperties>()).gameObject;
-
-                    GameObject val = UnityEngine.Object.Instantiate<GameObject>(ScanNode, ((Component)__instance).transform.position, Quaternion.Euler(Vector3.zero), ((Component)__instance).transform);
-
-                    ScanNodeProperties scanNodeProperties = val.GetComponent<ScanNodeProperties>();
-
-                    if (scanNodeProperties != null)
+                    if (ScanNode != null)
                     {
-                        scanNodeProperties.headerText = __instance.GetType().Name;
-                        scanNodeProperties.nodeType = 2;
-                        scanNodeProperties.minRange = 3; // need to set it to the value which scrap has. (value 2 - can scan in your own hands when looking up) (value 3 seems fine, but scan disappears when coming close)
-                        scanNodeProperties.maxRange = 7;
-                        scanNodeProperties.requiresLineOfSight = true;
-                        scanNodeProperties.creatureScanID = -1;
+                        GameObject val = UnityEngine.Object.Instantiate<GameObject>(ScanNode, ((Component)__instance).transform.position, Quaternion.Euler(Vector3.zero), ((Component)__instance).transform);
+
+                        ScanNodeProperties scanNodeProperties = val.GetComponent<ScanNodeProperties>();
+
+                        if (scanNodeProperties != null)
+                        {
+                            scanNodeProperties.headerText = __instance.itemProperties.itemName;
+                            scanNodeProperties.nodeType = 2;
+                            scanNodeProperties.minRange = 3; // need to set it to the value which scrap has. (value 2 - can scan in your own hands when looking up) (value 3 seems fine, but scan disappears when coming close)
+                            scanNodeProperties.maxRange = 7;
+                            scanNodeProperties.requiresLineOfSight = true;
+                            scanNodeProperties.creatureScanID = -1;
+                        }
+                        else
+                        {
+                            Debug.LogError($"Couldn't add scanNodeProperties to instance of object named: {__instance.GetType().Name}");
+                        }
                     }
                     else
                     {
-                        Debug.LogError($"Couldn't add scanNodeProperties to instance of object named: {__instance.GetType().Name}");
+                        Debug.LogError($"Couldn't create scanNode for object");
                     }
 
                 }
 
                 __instance.itemProperties.isScrap = true;
 
-                for (int k = 0; k < UnityEngine.Object.FindObjectOfType<Terminal>().buyableItemsList.Length; k++)
+                try
                 {
-
-                    if(UnityEngine.Object.FindObjectOfType<Terminal>().buyableItemsList[k].itemName == __instance.itemProperties.itemName)
+                    for (int k = 0; k < UnityEngine.Object.FindObjectOfType<Terminal>().buyableItemsList.Length; k++)
                     {
-                            __instance.SetScrapValue(
-                        
-                                    (__instance.itemProperties.creditsWorth / 2)
-                                    * (UnityEngine.Object.FindObjectOfType<Terminal>().itemSalesPercentages[k] / 100)
-                                
-                            );
 
+                        if (UnityEngine.Object.FindObjectOfType<Terminal>().buyableItemsList[k].itemName == __instance.itemProperties.itemName)
+                        {
+                            Debug.Log($"Found item {UnityEngine.Object.FindObjectOfType<Terminal>().buyableItemsList[k].itemName} with sales {UnityEngine.Object.FindObjectOfType<Terminal>().itemSalesPercentages[k]}");
+
+                            __instance.SetScrapValue(
+                                        (__instance.itemProperties.creditsWorth * UnityEngine.Object.FindObjectOfType<Terminal>().itemSalesPercentages[k]) / 200
+                                );
+
+                            Debug.Log($"Set item value to: {(__instance.itemProperties.creditsWorth * UnityEngine.Object.FindObjectOfType<Terminal>().itemSalesPercentages[k]) / 200}");
+
+                        }
                     }
                 }
-
+                catch
+                {
+                    __instance.SetScrapValue(0);
+                    Debug.Log("Item not found in the current terminal store or other error occured. For safety purposes, its' price is set to 0");
+                }
 
                 __instance.itemProperties.isScrap = false ;
 
@@ -121,7 +125,7 @@ namespace SellYourStuff.Patches
             }
             else
             {
-                Debug.LogError($"One of the required objects (__instance, __instance.itemProperties) is null for {__instance.GetType().Name}");
+                Debug.LogError($"One of the required objects (__instance, __instance.itemProperties) is null");
             }
         }
 
