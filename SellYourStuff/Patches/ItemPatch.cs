@@ -2,6 +2,7 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -12,14 +13,33 @@ using UnityEngine;
 
 namespace SellYourStuff.Patches
 {
+    /*
+     * Optimization:
+     * 
+     * add parametrized values, that can be configured (scanNodeProperties)
+     * 
+     * 
+     *  // when I patch GrabbableObject as a whole class, then my method Postfix() will be called for each grabbableObject on map when they spawn.
+            // I can write this method separately for all the items classes like FlashlightItem, RadarBoosterItem etc, but it will take memory and plugin will be several times bigger
+            // maybe somehow put array of classes into [HarmonyPatch(typeof(...))]
+     */
 
-    [HarmonyPatch(typeof(DepositItemsDesk))]
-    internal class SellPatch
+    /// <summary>
+    /// This class contains list of names of items that will be patched by this plugin.
+    /// </summary>
+    internal class PatchableItemsList
     {
-        private static List<string> PatchableItems = new List<string> { "Flashlight","Extension ladder","Lockpicker","Jetpack",
+        protected static readonly List<string> PatchableItems = new List<string> { "Flashlight","Extension ladder","Lockpicker","Jetpack",
             "Pro-flashlight","TZP-Inhalant","Stun grenade", "Boombox","Spray paint",
             "Shovel","Walkie-talkie","Zap gun","Radar-booster"};
+    }
 
+    /// <summary>
+    /// This class makes items sellable when placed on the counter in the company building. Before being patched by this class, all store-bought items are set to not be considered as a scrap
+    /// </summary>
+    [HarmonyPatch(typeof(DepositItemsDesk))]
+    internal class SellPatch : PatchableItemsList
+    {
         [HarmonyPatch("PlaceItemOnCounter")]
         static void Prefix(DepositItemsDesk __instance, [HarmonyArgument(0)] PlayerControllerB playerWhoTriggered)
         {
@@ -32,105 +52,104 @@ namespace SellYourStuff.Patches
                     item.itemProperties.isScrap = true;
                 }
             }
-
         }
     }
+
+    /// <summary>
+    /// Class that applies scanNodes for items and sets their prices.
+    /// </summary>
     [HarmonyPatch(typeof(GrabbableObject))]
-    internal class ItemPatch
+    internal class ItemPatch : PatchableItemsList
     {
-        // list of names of patchable items. I don't use classes, as it will cause conflicts (ex. Shovel class has instances of: Yield sign, Stop sign, Shovel, which causes slight problems)
-        // but when I patch GrabbableObject as a whole class, then my method Postfix() will be called for each grabbableObject on map when they spawn.
-            // I can write this method separately for all the items classes like FlashlightItem, RadarBoosterItem etc, but it will take memory and plugin will be several times bigger
-            // maybe somehow put array of classes into [HarmonyPatch(typeof(...))]
+        private const int NodeType = 2;
+        private const int MinRange = 3;
+        private const int MaxRange = 7;
+        private const int creatureScanId = -1;
+        private const bool requiresLineOfSight = true;
 
-        private static List<string> PatchableItems = new List<string> { "Flashlight","Extension ladder","Lockpicker","Jetpack",
-            "Pro-flashlight","TZP-Inhalant","Stun grenade", "Boombox","Spray paint",
-            "Shovel","Walkie-talkie","Zap gun","Radar-booster"};
-
+        // Main function that does all stuff. Applies node to item, sets its value
         [HarmonyPatch("Start")]
         [HarmonyPostfix]
         static void Postfix(GrabbableObject __instance)
         {
             if (__instance != null && __instance.itemProperties != null && PatchableItems.Contains(__instance.itemProperties.itemName))
             {
-                // if object doesn't have a scanNode already then catch() will be done
-                try 
-                {
-                    object node = __instance.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText; //checking if scanNode exists by existence of header text on scanNode
-
-                    Debug.Log($"Instance of {__instance.GetType().Name} has scanNode already.");
-                }
-                catch
-                {
-                    Debug.Log($"Instance of {__instance.GetType().Name} doesnt have scanNode. Creating node");
-                    GameObject ScanNode;
-
-                    ScanNode = ((Component)UnityEngine.Object.FindObjectOfType<ScanNodeProperties>()).gameObject;
-                    if (ScanNode != null)
-                    {
-                        GameObject val = UnityEngine.Object.Instantiate<GameObject>(ScanNode, ((Component)__instance).transform.position, Quaternion.Euler(Vector3.zero), ((Component)__instance).transform);
-
-                        ScanNodeProperties scanNodeProperties = val.GetComponent<ScanNodeProperties>();
-
-                        if (scanNodeProperties != null)
-                        {
-                            scanNodeProperties.headerText = __instance.itemProperties.itemName;
-                            scanNodeProperties.nodeType = 2;
-                            scanNodeProperties.minRange = 3; // need to set it to the value which scrap has. (value 2 - can scan in your own hands when looking up) (value 3 seems fine, but scan disappears when coming close)
-                            scanNodeProperties.maxRange = 7;
-                            scanNodeProperties.requiresLineOfSight = true;
-                            scanNodeProperties.creatureScanID = -1;
-                        }
-                        else
-                        {
-                            Debug.LogError($"Couldn't add scanNodeProperties to instance of object named: {__instance.GetType().Name}");
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError($"Couldn't create scanNode for object");
-                    }
-
-                }
+                TryAddScanNode(__instance);
 
                 __instance.itemProperties.isScrap = true;
 
-                try
-                {
-                    for (int k = 0; k < UnityEngine.Object.FindObjectOfType<Terminal>().buyableItemsList.Length; k++)
-                    {
+                TrySetScrapValue(__instance);
 
-                        if (UnityEngine.Object.FindObjectOfType<Terminal>().buyableItemsList[k].itemName == __instance.itemProperties.itemName)
-                        {
-                            Debug.Log($"Found item {UnityEngine.Object.FindObjectOfType<Terminal>().buyableItemsList[k].itemName} with sales {UnityEngine.Object.FindObjectOfType<Terminal>().itemSalesPercentages[k]}");
-
-                            __instance.SetScrapValue(
-                                        (__instance.itemProperties.creditsWorth * UnityEngine.Object.FindObjectOfType<Terminal>().itemSalesPercentages[k]) / 200
-                                );
-
-                            Debug.Log($"Set item value to: {(__instance.itemProperties.creditsWorth * UnityEngine.Object.FindObjectOfType<Terminal>().itemSalesPercentages[k]) / 200}");
-
-                        }
-                    }
-                }
-                catch
-                {
-                    __instance.SetScrapValue(0);
-                    Debug.Log("Item not found in the current terminal store or other error occured. For safety purposes, its' price is set to 0");
-                }
-
-                __instance.itemProperties.isScrap = false ;
-
-
-            }
-            else
-            {
-                Debug.LogError($"One of the required objects (__instance, __instance.itemProperties) is null");
+                __instance.itemProperties.isScrap = false;
             }
         }
 
-        
+        // Function that sets scrap value for item, considering it's store price with discounts, and applies also fee (50% by default) on its price
+        private static void TrySetScrapValue(GrabbableObject __instance)
+        {
+            try
+            {
+                Terminal terminal = UnityEngine.Object.FindObjectOfType<Terminal>();
+                for (int k = 0; k < UnityEngine.Object.FindObjectOfType<Terminal>().buyableItemsList.Length; k++)
+                {
+
+                    if (terminal.buyableItemsList[k].itemName == __instance.itemProperties.itemName)
+                    {
+                        int percent = terminal.itemSalesPercentages[k];
+
+                        __instance.SetScrapValue(
+                                    (__instance.itemProperties.creditsWorth * percent) / 200
+                            ); // formula is written that way to avoid float/double values
+
+
+                    }
+                }
+            }
+            catch
+            {
+                Debug.LogError("Item not found in store");
+            }
+
+        }
+
+        // Function that adds scanNode to item if it doesn't have one yet.
+        private static void TryAddScanNode(GrabbableObject __instance)
+        {
+            try
+            {
+                object node = __instance.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText; //checking if scanNode exists by existence of header text on scanNode
+
+            }
+            catch
+            {
+                //creating scanNode
+                GameObject ScanNode;
+
+                ScanNode = ((Component)UnityEngine.Object.FindObjectOfType<ScanNodeProperties>()).gameObject;
+
+                if (ScanNode != null)
+                {
+                    GameObject val = UnityEngine.Object.Instantiate<GameObject>(ScanNode, ((Component)__instance).transform.position, Quaternion.Euler(Vector3.zero), ((Component)__instance).transform);
+
+                    ScanNodeProperties scanNodeProperties = val.GetComponent<ScanNodeProperties>();
+
+                    if (scanNodeProperties != null)
+                    {
+                        scanNodeProperties.headerText = __instance.itemProperties.itemName;
+                        scanNodeProperties.nodeType = NodeType;
+                        scanNodeProperties.minRange = MinRange;
+                        scanNodeProperties.maxRange = MaxRange;
+                        scanNodeProperties.requiresLineOfSight = requiresLineOfSight;
+                        scanNodeProperties.creatureScanID = creatureScanId;
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"Couldn't create scanNode for object");
+                }
+
+            }
+        }
 
     }
-
 }
