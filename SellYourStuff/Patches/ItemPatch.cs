@@ -18,9 +18,7 @@ namespace SellYourStuff.Patches
      * 
      *              Version 1.0.0
      * multiply creditsWorth by current discount to get price (Terminal -> itemSalesPercentages)
-     * test all items in v49
      * Yield sign is scanned as "Shovel". check other items too for it.
-     *      then does yield sign count as notScrap?
      * 
      * Possibly:
      * allow user to change price of items (so I can sell bought items for more or less than 50%)
@@ -67,7 +65,7 @@ namespace SellYourStuff.Patches
                 // if object doesn't have a scanNode already
                 try 
                 {
-                    object node = __instance.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText;
+                    object node = __instance.gameObject.GetComponentInChildren<ScanNodeProperties>().headerText; //checking if node exists by existence of header text on scanNode
 
                     Debug.Log($"Instance of {__instance.GetType().Name} has scanNode already.");
                 }
@@ -111,40 +109,12 @@ namespace SellYourStuff.Patches
             }
             else
             {
-                Debug.LogError("One of the required objects (__instance, __instance.itemProperties) is null.");
+                Debug.LogError($"One of the required objects (__instance, __instance.itemProperties) is null for {__instance.GetType().Name}");
             }
         }
 
         
 
     }
-    
-    //[HarmonyPatch(typeof(RadarBoosterItem))]
-    //internal class RadarBoosterPatch
-    //{
-
-    //    [HarmonyPatch("Start")]
-    //    [HarmonyPostfix]
-    //    static void Postfix(RadarBoosterItem __instance)
-    //    {
-    //        if (__instance != null && __instance.itemProperties != null)
-    //        {
-    //            __instance.itemProperties.isScrap = true;
-
-    //            __instance.SetScrapValue(__instance.itemProperties.creditsWorth / 2); // need to also multiply it by current discount in Terminal class
-
-    //            __instance.itemProperties.isScrap = false ;
-
-
-    //        }
-    //        else
-    //        {
-    //            Debug.LogError("One of the required objects (__instance, __instance.itemProperties) is null.");
-    //        }
-    //    }
-
-
-
-    //}
 
 }
