@@ -31,7 +31,3 @@ This mod is not fully tested. I appreciate any help
   - Set the list of items that can be sold (so it will be easier to make mod compatible with other mods that add items)
 - Maybe optimize the plugin:
   - Apply plugin specifically to the classes of store-bought items. It means there will be lot of repeating lines of code, but in the end it may make performance better, because as of now, my plugin gets called each time when GrabbableItem instance is created and method Start() called for it
-
-#### [For support](https://www.buymeacoffee.com/axeron)  
-I really appreciate any support and kind words!
-
